@@ -4,9 +4,9 @@ exports.seed = function(knex, Promise) {
     .then(function () {
       return Promise.all([
         // Inserts seed entries
-        knex('list').insert({ list: 'do something fun'}),
-        knex('list').insert({ list: 'do something sad'}),
-        knex('list').insert({ list: 'do something weird'})
+        knex('list').insert({ list: 'do something fun', users_id: 1}),
+        knex('list').insert({ list: 'do something sad', users_id: 2}),
+        knex('list').insert({ list: 'do something weird', users_id: 3})
       ]);
     });
 };
