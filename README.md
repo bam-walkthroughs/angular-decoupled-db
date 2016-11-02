@@ -1,53 +1,59 @@
 # Angular Decoupled Database
 
 ### Objective:
-The purpose of this walkthrough is demonstrate setting up a database for authorization and storing pertinent information about the to-do list. It will demonstrate a one-to-many relationship between tables.  
+In this series of walk-throughs we will be creating a simple to-do list decoupled Angular app. In this segment we will demonstrate how to set up a database for storing users and to-do list items. We have set up this project to demonstrate a one-to-many relationship between tables.  
 
-##Part 1 of Angular-To-Do: Make a Database
+## Set up your project structure
 
-(1)In terminal do in an empty directory `npm init`
+(1) In your terminal navigate to an empty folder and enter `npm init`
 
-	- This spins up your package.json file
+	- This creates a package.json file
 
-(2)From the terminal type `npm initstall`
+(2) Next type in `npm install`
 
-	- This makes the node_modules
+	- This creates a node_modules file
+	
+(3) Initiate a git file with `git init`
 
-(3)In terminal `npm install gitignore -g` (if you don't have gitignore installed globally)
+	- Creates a git repo in your project folder
 
-	- This makes your .gitignore file
+(4) Next enter `npm install gitignore -g`
 
-##ADD DEPENDENCIES Knex, pg dotenv
+	- This will install gitignore globally on your system if you don't have it already
+	
+(5) Finally in your terminal enter `gitignore node`
+	
+	- This creates a .gitignore file for your project and adds node_modules to the list of files to disregard when commiting
 
-(4) In terminal `npm install knex pg dotenv  --save`
+### Add dependecies: Knex, pg and Dotenv
 
- - Installs dotenv module and adds to the dependencies in package.json(this loads the environment variables)Installs postgres and knex.js and adds them to the dependencies in the package.json
+(6) In terminal enter `npm install knex pg dotenv  --save`
 
-(5)In terminal type `knex init`
+	- This installs the dotenv, postgress and knex.js modules and adds them as dependencies in your package.json. Dotenv is a module to load the environment variables. Pg is short for postgres and adds postgres capabilites to your project. Knex.js is used as a SQL query builder.
+	
+[Knex.js](http://knexjs.org/)
 
- * Creates knexfile.js
+[pg](https://www.npmjs.com/package/pg)
 
-(6)In terminal `git init`
+[Dotenv](https://www.npmjs.com/package/dotenv)
 
- * This initializes a git repo for your project
+(7) Next enter in `knex init`
 
-(7) In terminal `echo node_modules > .gitignore`
+	- Initiates a knexfile.js in your project folder
 
-* This moves node modules to the .gitignore file
+(8) The next step is to enter `touch .env`
+	
+	- This creates an empty .env file
 
-(8)In terminal `touch .env` 	 
+(9) In terminal add .env to the .gitignore file with `echo .env >> .gitignore`
 
-* This makes an empty .env file in the root directory
+	- This adds .env to your .gitignore file, disregarding the .env file when commiting
 
-(9)In terminal `echo .env >> .gitignore`
+(10) Finally lets open our project up with your prefered text editor
 
-* This adds the .env file to .gitignore so git doesn't track it
+### Start adding code
 
-(11)In terminal `atom .`
-
-* This opens the directory in atom
-
-(12)Inside the knexfile.js add the following.  
+(11) Navigate to the knexfile.js file we created earlier and add the following:
 
 ```
 
@@ -65,13 +71,15 @@ module.exports = {
 
 ```
 
+	- This code snippet imports dotenv to your knexfile.js and sets up two different sets of environment variables; one for development and one for production. Both environments are using the imported pg module but development connects to a local database and production will use a hosted database.
 
 
-(13)In terminal in the root directory make a directory called db
 
-- `mkdir db && cd db && touch knex.js`
+(12) Next in the terminal in the root directory make a folder called db and within that, a file called knex.js `mkdir db && cd db && touch knex.js`
 
-(14) Add the follwing to knex.js
+	- This creates a location for us to store our Knex.js configuration so that we can use it later
+
+(13) Add the follwing to knex.js:
 
 ```
 var environment = process.env.NODE_ENV || 'development';
@@ -80,19 +88,19 @@ var knex = require('knex')(config);
 module.exports= knex;
 ```
 
-##SETTING UP DATABASE POSTGRES DATABASE
+## Set up a local Postgres database
 
-(1)In terminal `createdb db_name` (name you want the database to be)
+(14) In terminal `createdb DB_NAME` (name you want the database to be)
 
-(2) Go into knexfile.js and add database name to development connection
+(15) Lets go back into knexfile.js and add the database name to your development environment. For example:
 
-		- connection: 'postgres://localhost/DATABASE NAME YOU JUST CREATED'
+	- connection: 'postgres://localhost/DB_NAME'
 
-(3)In terminal `knex migrate:make table_name`
+(16) Now lets start creating tables using our knex module `knex migrate:make table_name`
 
-	- we will make a users table for auth inside of this table, best to name it 'users'. This will occur in the migrations folder that will be set up once the command is ran.
+	- This creates a new migration file named whatever you passed in as the table_name, for this project lets call it 'users'
 
-(3.1) Inside of the knex migration file add the following.
+(16.1) Inside of the knex migration file named 'users' add the following code:
 
 ```
 	exports.up = function(knex, Promise) {
@@ -108,9 +116,11 @@ exports.down = function(knex, Promise) {
 
 ```
 
-(4)We will now make the second table for to-do list data, in terminal `knex migrate:make table_name`
+	- This code when executed later will create a users table within our local database with three rows; one for an incrementing ID, one for userName and one for password.
 
-(4.1) Inside of the new migration folder add:
+(17) Lets repeat the process and create a second table for the to-do list data, in the terminal enter `knex migrate:make to_do`
+
+(17.1) Open up the 'to_do' migration folder and add:
 
 ```
 
@@ -127,20 +137,23 @@ exports.down = function(knex, Promise) {
 
 ```
 
-(6) In your terminal type `knex migrate:latest`
+	- This will create an incrementing ID row, list row and a users_id reference row that references your first 'users' tables' 'id' row, this is called a foreign key.
 
-- This adds the tables to your database
+(18) Now that you have two tables set up you will need to use the knex module to import those to your local database. In your terminal when you're at the root of your project directory enter `knex migrate:latest`
 
-
-##SEEDING DATA
-
-- **When making seed file name, add in a number so the seeds will run in order**
+	- This uses the knex module and creates the two tables using your development environment in your local database
 
 
+## Seeding Your Database
 
-(6) In terminal `knex seed:make 0_seed_reset` this will make a new seed file called 0_seed_reset.
+- **When making seed file name, add in a number so the seeds will run in a specific order (for example: '01_userSeed')**
 
-(6.1) Open the seed file in Atom, and set up seed data.
+
+(19) To start seeding files, in the terminal enter `knex seed:make 00_seed_reset`
+
+	- This seed reset file, prefaced with 00, will run first everytime you use the knex module to seed your database
+
+(19.1) Navigate to the newly created seed file in your text editor, and set up the reset seed data.
 
 ```
 exports.seed = function(knex, Promise) {
@@ -154,15 +167,17 @@ exports.seed = function(knex, Promise) {
 };
 ```
 
+	- The seed data above will run first each time you initiate the knex module. It ensures that all seed data is cleared before from both tables before reseeding with any new data, removing the possibility for duplicates or the incrementing ID's from not reseting to 0.
 
-(7) This will make the second seed file, in terminal type  `knex seed:make 1_seed_users`
 
-- To make hashed passwords go to (passwords need to be hashed!!!)
-https://www.dailycred.com/article/bcrypt-calculator#
-For now i am setting all seed data passwords to (password)
+(20) To seed the 'users' table create a second seed file by typing in to the terminal  `knex seed:make 01_seed_users`
 
-- Once you have hashed the passwords go into new seed file and set up seed data
-
+	- Passwords need to be hashed!!!! For the purpose of demonstrating we will be using the Bcrypt website to hash passwords for us, but for full production you would need to integrate bcrypt into your app. For more information check out:
+   [Bcrypt] (https://www.dailycred.com/article/bcrypt-calculator)
+   
+(20.1) Now that you have created a seed file for users lets navigate to it in our text editor and add some sample seed data:
+   
+	
 ```
 
 exports.seed = function(knex, Promise) {
@@ -178,23 +193,25 @@ exports.seed = function(knex, Promise) {
 					}),
 
         knex('users').insert({
-					userName: 'bradford',
+					userName: 'russell',
 					password: '$2a$08$3IzKZNj/Fwr4EvAQwg0e7.UHpfsqobTJWGNcVNUKRgYYW.S49kzrC'
 					}),
 
         knex('users').insert({
-				 userName: 'west',
-				 password : '$2a$08$Ke4xLA90Sxr3gB.tYeOej.HQDpCKNdMe6PB8Gg/L3l17YU3yhwCAW'
-				 })
+				 	userName: 'west',
+				 	password : '$2a$08$Ke4xLA90Sxr3gB.tYeOej.HQDpCKNdMe6PB8Gg/L3l17YU3yhwCAW'
+				 	})
       ]);
     });
 };
 
 ```
 
-(7) To create the final seed file, in terminal, `knex seed:make 2_seed_list`
+	- As you can see above we are seeding a userName and hashed password for each user. The first row of the table (the incrementing ID) will be auto-filled when seeding.
 
-(7.1) Go into newly created seed file and set up seed data for items that will be inside of user's to-do lists.
+(21) To create the final seed file, in the terminal enter `knex seed:make 02_seed_list`
+
+(21.1) Go into the newly created seed file and set up seed data for items that will be inside of each user's to-do lists.
 
 ```
 exports.seed = function(knex, Promise) {
@@ -211,4 +228,10 @@ exports.seed = function(knex, Promise) {
 };
 ```
 
-(8) In your terminal `knex seed:run` this will add all the data to the tables in the database.
+(22) After all of your seed data is entered we need to use the knex module to populate our tables. In your terminal enter `knex seed:run` 
+
+	- This will add all the seed data to the tables in the database. Knex module will work in order based off of the prefixed number 00-02. Each time it runs it will clear the users table and any information associated with that user, reset the ID count so each time you will start from 1 and then clear any extranious users and to-do list items.
+	
+### That's it! Later in the series we will show you how to set up a heroku based database for production, but for now, you set up an Angular Decoupled Database! Make sure to check out the next walk-through where we will work on creating an [Angular server](https://github.com/bam-walkthroughs/angular-decoupled-server). Or checkout other walk-throughs at https://github.com/bam-walkthroughs.
+
+
